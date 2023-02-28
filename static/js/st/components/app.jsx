@@ -90,8 +90,7 @@ class Layout extends React.Component {
     }
   }
 
-  // these are mixed into all children's props (lightboxes included)
-  childProps() {
+  midiProps() {
     return {
       midi: this.state.midi,
       midiInput: this.state.midiInput,
@@ -99,8 +98,16 @@ class Layout extends React.Component {
     }
   }
 
+  // these are mixed into all children's props (lightboxes included)
+  pageProps() {
+    return {
+      ...this.midiProps(),
+      ref: this.currentPageRef ||= React.createRef()
+    }
+  }
+
   render() {
-    let pageProps = this.childProps()
+    let pageProps = this.pageProps()
 
     return <div className="page_layout">
       <div className="header_spacer">
@@ -153,7 +160,7 @@ class Layout extends React.Component {
 
     let lb = React.cloneElement(this.state.currentLightbox, {
       ref: "currentLightbox",
-      ...this.childProps()
+      ...this.midiProps()
     })
 
     return <CSSTransition classNames="show_lightbox" timeout={{enter: 200, exit: 100}}>
@@ -231,9 +238,11 @@ class Layout extends React.Component {
       this.state.midiOutputChannel.sendMessage(message.data)
     }
 
+    const page = this.currentPageRef && this.currentPageRef.current
+
     // proxy message to the current page
-    if (this.currentPage && this.currentPage.onMidiMessage) {
-      this.currentPage.onMidiMessage(message)
+    if (page && page.onMidiMessage) {
+      page.onMidiMessage(message)
     }
   }
 
